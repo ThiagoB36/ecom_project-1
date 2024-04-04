@@ -29,7 +29,7 @@ export interface Product {
 interface CartItemsProps {
   products: Product[];
   cartTotal: number;
-  totalQty: number; 
+  totalQty: number;
 }
 
 const CartItems: React.FC<CartItemsProps> = ({
@@ -40,17 +40,28 @@ const CartItems: React.FC<CartItemsProps> = ({
   const [busy, setBusy] = useState(false);
   const router = useRouter();
 
-  const updateCart = async (prodcutId: string, quantity: number) => {
+  const updateCart = async (productId: string, quantity: number) => {
     setBusy(true);
     await fetch("/api/product/cart", {
       method: "POST",
       body: JSON.stringify({
-        productId: prodcutId,
+        productId: productId,
         quantity: quantity,
       }),
     });
     router.refresh();
     setBusy(false);
+  };
+
+  const checkoutWorkFlow = async () => {
+    console.log('checkoutworkflow')
+    await fetch("/api/checkout", {
+      method: "POST",
+      body: JSON.stringify({
+        // productId: productId,
+        // quantity: quantity,
+      }),
+    });
   };
 
   return (
@@ -59,7 +70,7 @@ const CartItems: React.FC<CartItemsProps> = ({
         <tbody className="bg-white divide-y divide-gray-200">
           {products.map((product) => {
             const quantity = product.quantity;
-            const price = resolveTypeJsonValues(product?.price)
+            const price = resolveTypeJsonValues(product?.price);
 
             const discounted = price?.discounted ?? 1;
             const multiplication = discounted * quantity;
@@ -117,6 +128,7 @@ const CartItems: React.FC<CartItemsProps> = ({
           className="shadow-none hover:shadow-none  focus:shadow-none focus:scale-105 active:scale-100"
           color="green"
           disabled={busy}
+          onClick={checkoutWorkFlow}
         >
           Checkout
         </Button>
