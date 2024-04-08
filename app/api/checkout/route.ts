@@ -1,3 +1,4 @@
+import { resolveTypeJsonValues } from "@/app/utils/helpers/resolveTypeJsonValues";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { getCartItems } from "@/app/lib/cartHelper";
 import { getServerSession } from "next-auth";
@@ -30,6 +31,16 @@ export const POST = async (req: Request) => {
     // fetching cart details
     const cartItems = await getCartItems();
     console.log({ cartItems, session });
+    let totalQty = 0;
+    let cartTotal = 0;
+
+    cartItems?.map((item) => {
+      const newPrice = resolveTypeJsonValues(item?.price);
+      const discounted = newPrice.discounted ?? 0;
+
+      totalQty = totalQty + item.quantity;
+      cartTotal = cartTotal + discounted * item.quantity;
+    });
 
     // if (session.user.id !== cartId) {
     //   return NextResponse.json({ error: "Invalid cart id!" }, { status: 401 });
@@ -40,25 +51,27 @@ export const POST = async (req: Request) => {
 
     // we need to generate payment link and send to front end.
     const params: Stripe.Checkout.SessionCreateParams = {
-      mode: "payment",
-      payment_method_types: ["card"],
       line_items: [
         {
+          quantity: 1,
           price_data: {
-            currency: "usd",
-            unit_amount: 100, //----'PRICE OF OUR PRODUCT',
+            currency: "BRL",
+            unit_amount: cartTotal * 100,
             product_data: {
-              name: "teste de checkout",
-              images: [],
+              name: "Valor total da compra",
             },
           },
-          quantity: 1,
         },
       ],
+      mode: "payment",
+      success_url: `https://3000-pmarq-ecomproject-nkcvuok42oq.ws-us110.gitpod.io/cart/?success=true`,
+      cancel_url: `https://3000-pmarq-ecomproject-nkcvuok42oq.ws-us110.gitpod.io/cart/?canceled=true`,
     };
-    console.log({ params, stripe });
-    const checkoutSession = await stripe.checkout.sessions.create(params); //----- tem erro
+    const checkoutSession = await stripe.checkout.sessions.create(params);
+
     console.log({ checkoutSession });
-    return NextResponse.json({ url: checkoutSession.url });
-  } catch (error) {}
+    return NextResponse.json({ teste: "teste" }); //----- return not works
+  } catch (error) {
+    console.log({ error });
+  }
 };

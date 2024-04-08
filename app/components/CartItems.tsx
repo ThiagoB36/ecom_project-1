@@ -42,19 +42,20 @@ const CartItems: React.FC<CartItemsProps> = ({
 
   const updateCart = async (productId: string, quantity: number) => {
     setBusy(true);
-    await fetch("/api/product/cart", {
+    const urlApi = await fetch("/api/product/cart", {
       method: "POST",
       body: JSON.stringify({
         productId: productId,
         quantity: quantity,
       }),
     });
+    console.log({ urlApi });
     router.refresh();
     setBusy(false);
   };
 
   const checkoutWorkFlow = async () => {
-    console.log('checkoutworkflow')
+    console.log("checkoutworkflow");
     await fetch("/api/checkout", {
       method: "POST",
       body: JSON.stringify({
