@@ -117,7 +117,6 @@ export default async function Cart() {
     );
   }
 
-  console.log({ totalQty, cartTotal });
   return (
     <div>
       <CartItems
